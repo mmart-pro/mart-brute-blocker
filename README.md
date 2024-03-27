@@ -1,3 +1,5 @@
+![GitHub CI](https://github.com/mmart-pro/mart-brute-blocker/actions/workflows/main.yml/badge.svg)
+
 # Проектная работа сервис "Анти-брутфорс"
 
 ### Обязательные требования для каждого проекта
