@@ -24,7 +24,7 @@ generate:
 #	go generate ./...
 	rm -Rf internal/grpc/pb
 	mkdir -p internal/grpc/pb
-	protoc -I ./api --go_out=. --go-grpc_out=. --grpc-gateway_out=. api/mbb/mbb.proto
+	protoc -I ./api --go_out=. --go-grpc_out=. api/mbb/mbb.proto
 
 build: config generate
 	go build -v -o $(BIN_API) -ldflags "$(LDFLAGS)" ./cmd/mbb-api
