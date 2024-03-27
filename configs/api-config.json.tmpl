@@ -1,0 +1,23 @@
+{
+    "logger": {
+        "level": "${LOGGGER_LEVEL}",
+        "logfile": "${LOGGGER_FILE}"
+    },
+    "grpc": {
+        "host": "${GRPC_HOST}",
+        "port": "${GRPC_PORT}"
+    },
+    "service": {
+        "maxPerMinForLogin": ${SERVICE_MAX_PER_MIN_FOR_LOGIN},
+        "maxPerMinForPassword": ${SERVICE_MAX_PER_MIN_FOR_PASSWORD},
+        "maxPerMinForIp": ${SERVICE_MAX_PER_MIN_FOR_IP}
+    },
+    "storage": {
+        "useDb": ${STORAGE_USE_DB},
+        "host": "${STORAGE_HOST}",
+        "port": ${STORAGE_PORT},
+        "user": "${STORAGE_USER}",
+        "password": "${STORAGE_PASSWORD}",
+        "database": "${STORAGE_DB_NAME}"
+    }
+}

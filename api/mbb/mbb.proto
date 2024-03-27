@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package api;
+
+option go_package = "internal/grpc/pb";
+
+import "google/protobuf/empty.proto";
+
+message SubnetReq {
+    string subnet = 1;
+}
+
+message IpReq {
+    string ip = 1;
+}
+
+message ErrorResponse {
+    string error = 1;
+}
+
+message ExistsResponse {
+    int32 listType = 1;
+}
+
+message ContainsResponse {
+    int32 listType = 1;
+}
+
+message ClearBucketRequest {
+    string ip = 1;
+    string login = 2;
+}
+
+message CheckRequest {
+    string ip = 1;
+    string login = 2;
+    string password = 3;
+}
+
+message CheckResponse {
+    bool allow = 1;
+}
+
+service MBBService {
+    rpc Allow(SubnetReq) returns(google.protobuf.Empty) {}
+    rpc Deny(SubnetReq) returns(google.protobuf.Empty) {}
+    rpc Remove(SubnetReq) returns(google.protobuf.Empty) {}
+    rpc Exists(SubnetReq) returns(ExistsResponse) {}
+    rpc Contains(IpReq) returns(ContainsResponse) {}
+
+    rpc ClearBucket(ClearBucketRequest) returns(google.protobuf.Empty) {}
+    rpc Check(CheckRequest) returns(CheckResponse) {}
+}
