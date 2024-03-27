@@ -17,10 +17,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup Go ${{ env.GO_VERSION }}.x
+      - name: Setup Go ${{ env.GO_VERSION }}
         uses: actions/setup-go@v2
         with:
-          go-version: ${{ env.GO_VERSION }}.x
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Install lint dependencies
         run: make install-lint-deps
@@ -37,10 +37,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Setup Go ${{ env.GO_VERSION }}.x
+    - name: Setup Go ${{ env.GO_VERSION }}
       uses: actions/setup-go@v2
       with:
-        go-version: ${{ env.GO_VERSION }}.x
+        go-version: ${{ env.GO_VERSION }}
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
