@@ -1,1 +1,5 @@
 bin/
+.vscode
+cmd/mbb-api/config.json
+cmd/mbb-cli/config.json
+*.log
