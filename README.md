@@ -1,4 +1,5 @@
 ![GitHub CI](https://github.com/mmart-pro/mart-brute-blocker/actions/workflows/main.yml/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mmart-pro/mart-brute-blocker)](https://goreportcard.com/report/github.com/mmart-pro/mart-brute-blocker)
 
 # Проектная работа сервис "Анти-брутфорс"
 
