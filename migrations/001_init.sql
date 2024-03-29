@@ -15,7 +15,3 @@ create table if not exists black_list (
 );
 
 create index if not exists ix_black_list_subnet on black_list using gist (subnet inet_ops);
-
--- +goose Down
-drop table if exists white_list;
-drop table if exists black_list;

@@ -125,7 +125,7 @@ func runner(cmd *cobra.Command, args []string) {
 	defer conn.Close()
 	client := pb.NewMBBServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	// run command

@@ -1,4 +1,4 @@
-ENV_NAME=./.env.dev
+ENV_NAME=./build/env.dev
 include ${ENV_NAME}
 DIR_API=./bin/api
 BIN_API=${DIR_API}/mbb-api
@@ -8,17 +8,16 @@ DIR_CLI=./bin/cli
 BIN_CLI=${DIR_CLI}/mbb-cli
 CLI_CFG=${DIR_CLI}/config.json
 CLI_CFG_TMPL=./configs/cli-config.json.tmpl
+DOCKER_IMG=mbb-api
 
 GIT_HASH := $(shell git log --format="%h" -n 1)
 LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
 
-dirs:
+config:
 	mkdir -p ${DIR_API}
-	mkdir -p ${DIR_CLI}
-
-config: dirs
-	env `cat ${ENV_NAME}` envsubst < ${CLI_CFG_TMPL} > ${CLI_CFG};
 	env `cat ${ENV_NAME}` envsubst < ${API_CFG_TMPL} > ${API_CFG};
+	mkdir -p ${DIR_CLI}
+	env `cat ${ENV_NAME}` envsubst < ${CLI_CFG_TMPL} > ${CLI_CFG};
 
 generate:
 #	go generate ./...
@@ -38,28 +37,37 @@ migrate:
 #	psql -U $(STORAGE_USER) -tc "SELECT 1 FROM pg_database WHERE datname = '$(STORAGE_DB_NAME)'" | grep -q 1 || psql -U $(STORAGE_USER) -c "CREATE DATABASE $(STORAGE_DB_NAME);"
 	goose -dir migrations postgres "host=$(STORAGE_HOST) port=$(STORAGE_PORT) user=$(STORAGE_USER) password=$(STORAGE_PASSWORD) dbname=$(STORAGE_DB_NAME) sslmode=disable" up
 
-run: build migrate
-	$(BIN_API) --config $(API_CFG)
-
-# build-img:
-# 	docker build \
-# 		--build-arg=LDFLAGS="$(LDFLAGS)" \
-# 		-t $(DOCKER_IMG) \
-# 		-f build/Dockerfile .
-
-# run-img: build-img
-# 	docker run $(DOCKER_IMG)
-
 test:
 	go test -race -count 100 ./internal/... ./pkg/...
 
 install-lint-deps:
 	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.56.2
-#	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.50.1
 
 lint: install-lint-deps
 	golangci-lint run ./...
 
+#run: build migrate
+#	$(BIN_API) --config $(API_CFG)
+
+run:
+	docker-compose -f build/docker-compose.yml up --build
+rund:
+	docker-compose -f build/docker-compose.yml up -d --build
+down:
+	docker-compose -f build/docker-compose.yml down
+status:
+	docker-compose -f build/docker-compose.yml ps
+
+# build-img:
+# #	LOGGGER_FILE=./mbb-api.log
+# #	env `cat ${ENV_NAME}` envsubst < ${API_CFG_TMPL} > ${API_CFG};
+# 	docker build \
+#   		--build-arg=CONFIG_FILE="$(API_CFG)" \
+# 		-t $(DOCKER_IMG) \
+# 		-f build/Dockerfile .
+
+# run-img: build-img
+# 	docker run -p 5000:5000 $(DOCKER_IMG)
 
 # up: config
 # 	env `cat ./.env.${ENV_NAME}` docker-compose -f ./docker/docker-compose.yaml up -d --build
@@ -85,5 +93,4 @@ lint: install-lint-deps
 # integration-test-cleanup: cfg-clean
 # 	env `cat ./deployments/env.${ENV_NAME}` docker-compose -f ./deployments/docker-compose.yaml down --rmi local --volumes --remove-orphans;
 
-
-.PHONY: dirs config build run version migrate generate test lint #build-img run-img  
+.PHONY: config generate build version migrate test install-lint-deps lint run rund down status
