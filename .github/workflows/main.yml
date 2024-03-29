@@ -30,6 +30,7 @@ jobs:
 
   test:
     name: Tests
+    needs: linters
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
