@@ -40,27 +40,27 @@ var (
 	}
 
 	allowCmdP = &cobra.Command{
-		Use:     "allow ip[/bitmask]",
-		Example: fmt.Sprintf("  %v allow 192.168.1.0/24\n  %v allow 172.16.1.1", rootCmdP.Use, rootCmdP.Use),
-		Short:   "Добавляет ip или подсеть в белый список",
-		Long:    "Команда allow добавляет ip или подсеть в белый список. Возвращает ошибку, если ip или подсеть уже добавлены в один из списков.",
+		Use:     "allow ip/bitmask",
+		Example: fmt.Sprintf("  %v allow 192.168.1.0/24\n  %v allow 172.16.1.1/32", rootCmdP.Use, rootCmdP.Use),
+		Short:   "Добавляет подсеть в белый список",
+		Long:    "Команда allow добавляет подсеть в белый список. Возвращает ошибку, если подсеть пересекается с уже существующией в списке.",
 		Args:    cobra.ExactArgs(1),
 	}
 
 	denyCmdP = &cobra.Command{
-		Use:     "deny ip[/bitmask]",
-		Example: fmt.Sprintf("  %v deny 192.168.1.0/24\n  %v deny 172.16.1.1", rootCmdP.Use, rootCmdP.Use),
-		Short:   "Добавляет ip или подсеть в чёрный список",
-		Long:    "Команда deny добавляет ip или подсеть в чёрный список. Возвращает ошибку, если ip или подсеть уже добавлены в один из списков.",
+		Use:     "deny ip/bitmask",
+		Example: fmt.Sprintf("  %v deny 192.168.1.0/24\n  %v deny 172.16.1.1/32", rootCmdP.Use, rootCmdP.Use),
+		Short:   "Добавляет подсеть в чёрный список",
+		Long:    "Команда deny добавляет подсеть в чёрный список. Возвращает ошибку, если подсеть пересекается с уже существующией в списке.",
 		Args:    cobra.ExactArgs(1),
 	}
 
 	removeCmdP = &cobra.Command{
-		Use:     "remove ip[/bitmask]",
-		Example: fmt.Sprintf("  %v remove 192.168.1.0/24\n  %v remove 172.16.1.1", rootCmdP.Use, rootCmdP.Use),
-		Short:   "Удаляет ip или подсеть из чёрного или белого списка по точному совпадению.",
-		Long: "Команда remove удаляет ip или подсеть из чёрного или белого списка по точному совпадению. " +
-			" Возвращает ошибку, если ip или подсеть не найены в списках.",
+		Use:     "remove ip/bitmask",
+		Example: fmt.Sprintf("  %v remove 192.168.1.0/24\n  %v remove 172.16.1.1/32", rootCmdP.Use, rootCmdP.Use),
+		Short:   "Удаляет подсеть из чёрного или белого списка по точному совпадению.",
+		Long: "Команда remove удаляет подсеть из чёрного или белого списка по точному совпадению. " +
+			" Возвращает ошибку, если подсеть не найена в списках.",
 		Args: cobra.ExactArgs(1),
 	}
 
@@ -144,9 +144,6 @@ func runner(cmd *cobra.Command, args []string) {
 		if err == nil {
 			fmt.Printf("ip contains in %s\n", model.ListType(res.ListType).String())
 		}
-		// _, err = client.Exists(ctx, in *SubnetReq, opts ...grpc.CallOption) (*ExistsResponse, error)
-		// _, err = client.Contains(ctx, in *IpReq, opts ...grpc.CallOption) (*ContainsResponse, error)
-		// _, err = client.Check(ctx context.Context, in *CheckRequest, opts ...grpc.CallOption) (*CheckResponse, error)
 	default:
 		err = errors.New("unknown command")
 	}
