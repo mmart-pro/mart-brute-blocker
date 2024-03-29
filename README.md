@@ -3,6 +3,21 @@
 
 # Проектная работа сервис "Анти-брутфорс"
 
+## Команды для сборки и тестирования проекта.
+
+* `make config` - Генерация файлов config.json
+* `make generate` - Генерация gRPC API
+* `make build` - Сборка бинарных файлов api и клиента (.bin/)
+* `make migrate` - Запуск миграций goose на локальной БД
+* `make test` - Выполнение unit-тестов
+* `make lint` -  запуск линтеров golangci-lint
+* `make run` - запуск контейнеров (docker-compose up)
+* `make rund`  - запуск контейнеров и отключение от консоли (docker-compose up -d)
+* `make status`  - статус контейнеров (docker-compose ps)
+* `make down` - остановка контейнеров (docker-compose down)
+* `make run-tests` - запуск docker-compose с тест-контейнерами (up)
+* `make down-tests` - остановка docker-compose с тест-контейнерами (down)
+
 ### Обязательные требования для каждого проекта
 * Наличие юнит-тестов на ключевые алгоритмы (core-логику) сервиса.
 * Наличие валидных Dockerfile и Makefile/Taskfile для сервиса.

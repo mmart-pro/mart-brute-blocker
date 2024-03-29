@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+  mbb-api:
+    container_name: mbb-api
+    build:
+      context: ../
+      dockerfile: build/Dockerfile
+    ports:
+      - 15000:5000
+    # volumes: 
+    #   - ../../config.yaml:/abf/config.yaml
+    networks:
+        - net_db
+    depends_on:
+        psql:
+          condition: service_healthy
+    restart: on-failure
+  psql:
+    image: "postgres:16-alpine"
+    environment: 
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=mbb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    volumes:
+#      - pgdata:/var/lib/postgresql/data
+      - ../migrations/:/docker-entrypoint-initdb.d/
+    ports:
+      - 15432:5432
+    networks:
+      - net_db
+  integration_test:
+    build:
+      context: ../
+      dockerfile: build/Dockerfile-tests
+    command: go test -v ./tests
+    depends_on:
+      - mbb-api
+      - psql
+    networks: 
+      - net_db      
+networks:
+  net_db:
+    driver: bridge

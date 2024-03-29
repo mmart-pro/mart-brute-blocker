@@ -53,44 +53,13 @@ run:
 	docker-compose -f build/docker-compose.yml up --build
 rund:
 	docker-compose -f build/docker-compose.yml up -d --build
-down:
-	docker-compose -f build/docker-compose.yml down
 status:
 	docker-compose -f build/docker-compose.yml ps
+down:
+	docker-compose -f build/docker-compose.yml down
+run-tests:
+	docker-compose -f build/docker-compose-tests.yml up --build
+down-tests:
+	docker-compose -f build/docker-compose-tests.yml down --rmi local --volumes --remove-orphans
 
-# build-img:
-# #	LOGGGER_FILE=./mbb-api.log
-# #	env `cat ${ENV_NAME}` envsubst < ${API_CFG_TMPL} > ${API_CFG};
-# 	docker build \
-#   		--build-arg=CONFIG_FILE="$(API_CFG)" \
-# 		-t $(DOCKER_IMG) \
-# 		-f build/Dockerfile .
-
-# run-img: build-img
-# 	docker run -p 5000:5000 $(DOCKER_IMG)
-
-# up: config
-# 	env `cat ./.env.${ENV_NAME}` docker-compose -f ./docker/docker-compose.yaml up -d --build
-
-# down: cfg-clean
-# 	env `cat ./deployments/env.${ENV_NAME}` docker-compose -f ./deployments/docker-compose.yaml down
-
-# restart: down up
-
-
-# cfg-clean:
-# 	rm -f ${API_CFG}
-
-# integration-test: config
-# 	set -e ;\
-# 	env `cat ./deployments/env.${ENV_NAME}` docker-compose -f ./deployments/docker-compose.yaml up -d --build;\
-# 	test_status_code=0 ;\
-# 	docker build -t tests --network host -f tests/Dockerfile . || test_status_code=$$? ;\
-# 	env `cat ./deployments/env.${ENV_NAME}` docker-compose -f ./deployments/docker-compose.yaml down --rmi local --volumes --remove-orphans; \
-#     rm -f ${API_CFG}; \
-# 	exit $$test_status_code ;
-
-# integration-test-cleanup: cfg-clean
-# 	env `cat ./deployments/env.${ENV_NAME}` docker-compose -f ./deployments/docker-compose.yaml down --rmi local --volumes --remove-orphans;
-
-.PHONY: config generate build version migrate test install-lint-deps lint run rund down status
+.PHONY: config generate build version migrate test install-lint-deps lint run rund status down run-tests down-tests
