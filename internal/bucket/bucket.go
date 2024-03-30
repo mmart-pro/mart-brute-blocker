@@ -41,21 +41,16 @@ func NewBucket(capacity int, rate time.Duration) (*Bucket, error) {
 		for {
 			select {
 			case <-b.ticker.C:
-				b.mx.RLock()
+				b.mx.Lock()
 				if time.Since(b.lastCheck) > b.ttl {
 					b.doneChannel <- true
-					b.mx.RUnlock()
-
+					b.mx.Unlock()
 					return
 				}
-				b.mx.RUnlock()
 
-				if b.currentAmount == b.capacity {
-					continue
+				if b.currentAmount < b.capacity {
+					b.currentAmount++
 				}
-
-				b.mx.Lock()
-				b.currentAmount++
 				b.mx.Unlock()
 			default:
 				continue
@@ -94,6 +89,12 @@ func (b *Bucket) Amount() int {
 func (b *Bucket) Reset() {
 	b.mx.Lock()
 	b.currentAmount = b.capacity
+	b.mx.Unlock()
+}
+
+func (b *Bucket) SetTTL(ttl time.Duration) {
+	b.mx.Lock()
+	b.ttl = ttl
 	b.mx.Unlock()
 }
 

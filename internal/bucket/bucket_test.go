@@ -74,7 +74,7 @@ func TestInvalidRate(t *testing.T) {
 
 func TestBucketCloseInactive(t *testing.T) {
 	b, err := NewBucket(1, rate)
-	b.ttl = time.Second * 2
+	b.SetTTL(time.Second * 2)
 	require.NoError(t, err)
 	require.True(t, <-b.GetDoneChannel())
 }

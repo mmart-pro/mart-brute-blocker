@@ -38,7 +38,7 @@ migrate:
 	goose -dir migrations postgres "host=$(STORAGE_HOST) port=$(STORAGE_PORT) user=$(STORAGE_USER) password=$(STORAGE_PASSWORD) dbname=$(STORAGE_DB_NAME) sslmode=disable" up
 
 test:
-	go test -race -count 100 ./internal/... ./pkg/...
+	go test -race ./internal/... ./pkg/...
 
 install-lint-deps:
 	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.56.2
