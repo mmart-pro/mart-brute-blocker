@@ -11,4 +11,10 @@ var (
 	ErrInvalidPassword = errors.New("invalid password")
 
 	ErrSubnetNotFound = errors.New("subnet or ip not found")
+
+	ErrBucketNotFound      = errors.New("bucket not found")
+	ErrBucketAlreadyExists = errors.New("bucket already exists")
+	ErrBucketConvertError  = errors.New("ups, not bucket value")
+
+	ErrBucketRateInvalid = errors.New("rate can't be zero value")
 )
