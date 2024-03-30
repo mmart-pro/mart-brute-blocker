@@ -5,6 +5,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/mmart-pro/mart-brute-blocker/internal/bucket"
+	"github.com/mmart-pro/mart-brute-blocker/internal/config"
 	errdef "github.com/mmart-pro/mart-brute-blocker/internal/errors"
 	"github.com/mmart-pro/mart-brute-blocker/internal/model"
 )
@@ -31,15 +33,29 @@ type Storage interface {
 	ContainsBlack(ctx context.Context, ipAddr model.IPAddr) (bool, error)
 }
 
-type MbbService struct {
-	logger  Logger
-	storage Storage
+type BucketStorage interface {
+	GetBucket(bucketID string) (*bucket.Bucket, error)
+	CreateBucket(bucketID string, bucket *bucket.Bucket) error
 }
 
-func NewMBBService(log Logger, storage Storage) *MbbService {
+type MbbService struct {
+	logger             Logger
+	storage            Storage
+	ipBucketStorage    BucketStorage
+	loginBucketStorage BucketStorage
+	pwdBucketStorage   BucketStorage
+	svgConfig          config.ServiceConfig
+}
+
+func NewMBBService(log Logger, storage Storage,
+	ipBucketStorage, loginBucketStorage, pwdBucketStorage BucketStorage, svgConfig config.ServiceConfig) *MbbService {
 	return &MbbService{
-		logger:  log,
-		storage: storage,
+		logger:             log,
+		storage:            storage,
+		ipBucketStorage:    ipBucketStorage,
+		loginBucketStorage: loginBucketStorage,
+		pwdBucketStorage:   pwdBucketStorage,
+		svgConfig:          svgConfig,
 	}
 }
 
@@ -139,7 +155,6 @@ func (service *MbbService) Exists(ctx context.Context, req model.Subnet) (model.
 }
 
 func (service *MbbService) Contains(ctx context.Context, req model.IPAddr) (model.ListType, error) {
-	time.Sleep(time.Second * 3)
 	service.logger.Debugf("white list contains check  %s", req)
 	if exists, err := service.storage.ContainsWhite(ctx, req); err != nil {
 		return model.NotInList, err
@@ -159,12 +174,25 @@ func (service *MbbService) Contains(ctx context.Context, req model.IPAddr) (mode
 	return model.NotInList, nil
 }
 
-func (service *MbbService) ClearBucket(_ context.Context, _ model.IPAddr, _ string) error {
-	// TODO: конь не валялся
+func (service *MbbService) ClearBucket(_ context.Context, ip model.IPAddr, login string) error {
+	if b, err := service.ipBucketStorage.GetBucket(ip.String()); !errors.Is(err, errdef.ErrBucketNotFound) {
+		if err != nil {
+			return err
+		}
+		b.Reset()
+	}
+
+	if b, err := service.loginBucketStorage.GetBucket(login); !errors.Is(err, errdef.ErrBucketNotFound) {
+		if err != nil {
+			return err
+		}
+		b.Reset()
+	}
+
 	return nil
 }
 
-func (service *MbbService) Check(ctx context.Context, ip model.IPAddr, _, _ string) (bool, error) {
+func (service *MbbService) Check(ctx context.Context, ip model.IPAddr, login, password string) (bool, error) {
 	if list, err := service.Contains(ctx, ip); err != nil {
 		return false, err
 	} else if list == model.WhiteList {
@@ -173,19 +201,39 @@ func (service *MbbService) Check(ctx context.Context, ip model.IPAddr, _, _ stri
 		return false, nil
 	}
 
-	// TODO: конь не валялся
-	// тут надо как раз реализовать алгоритм	// // нет в списках - пускаем по алгоритму
-	// for bucketName, verifiedData := range map[string]string{"ip": request.Ip, "login": request.Login, "password": request.Password} {
-	// 	if _, ok := s.buckets[bucketName]; !ok {
-	// 		s.logError("запрошен не существующий bucket: " + bucketName)
-	// 		continue
-	// 	}
-	// 	if hold, err := s.buckets[bucketName].Hold(verifiedData); err != nil {
-	// 		log.Logger.Error(bucketName + ": " + err.Error())
-	// 		return nil, status.Error(codes.FailedPrecondition, err.Error())
-	// 	} else if hold {
-	// 		return false, nil
-	// 	}
-	// }
+	if res, err := service.checkBucket(service.ipBucketStorage, ip.String(), service.svgConfig.MaxPerMinForIP); err != nil || !res {
+		return false, err
+	}
+
+	if res, err := service.checkBucket(service.loginBucketStorage, login, service.svgConfig.MaxPerMinForLogin); err != nil || !res {
+		return false, err
+	}
+
+	if res, err := service.checkBucket(service.pwdBucketStorage, password, service.svgConfig.MaxPerMinForPassword); err != nil || !res {
+		return false, err
+	}
+
 	return true, nil
+}
+
+func (service *MbbService) checkBucket(bucketStorage BucketStorage, key string, limit int) (bool, error) {
+	const capacity = 1
+
+	b, err := bucketStorage.GetBucket(key)
+	if err != nil && !errors.Is(err, errdef.ErrBucketNotFound) {
+		return false, err
+	}
+
+	if errors.Is(err, errdef.ErrBucketNotFound) {
+		rate := time.Minute / time.Duration(limit)
+		b, err = bucket.NewBucket(capacity, rate)
+		if err != nil {
+			return false, err
+		}
+		err = bucketStorage.CreateBucket(key, b)
+		if err != nil {
+			return false, err
+		}
+	}
+	return b.Allow(), nil
 }

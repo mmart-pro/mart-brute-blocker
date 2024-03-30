@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	bucketstorage "github.com/mmart-pro/mart-brute-blocker/internal/bucket/storage"
 	"github.com/mmart-pro/mart-brute-blocker/internal/config"
 	grpcserver "github.com/mmart-pro/mart-brute-blocker/internal/grpc"
 	"github.com/mmart-pro/mart-brute-blocker/internal/service/mbbservice"
@@ -63,7 +64,10 @@ func (app App) Startup(ctx context.Context) error {
 	defer storage.Close()
 
 	// events service
-	mbbService := mbbservice.NewMBBService(logg, storage)
+	ipBucketStorage := bucketstorage.NewBucketMemoryStorage()
+	loginBucketStorage := bucketstorage.NewBucketMemoryStorage()
+	pwdBucketStorage := bucketstorage.NewBucketMemoryStorage()
+	mbbService := mbbservice.NewMBBService(logg, storage, ipBucketStorage, loginBucketStorage, pwdBucketStorage, app.cfg.ServiceConfig)
 
 	logg.Infof("starting mbb api...")
 
