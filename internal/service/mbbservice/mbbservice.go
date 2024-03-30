@@ -48,7 +48,8 @@ type MbbService struct {
 }
 
 func NewMBBService(log Logger, storage Storage,
-	ipBucketStorage, loginBucketStorage, pwdBucketStorage BucketStorage, svgConfig config.ServiceConfig) *MbbService {
+	ipBucketStorage, loginBucketStorage, pwdBucketStorage BucketStorage,
+	svgConfig config.ServiceConfig) *MbbService { //nolint:gofumpt
 	return &MbbService{
 		logger:             log,
 		storage:            storage,

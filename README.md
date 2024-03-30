@@ -4,18 +4,21 @@
 # Проектная работа сервис "Анти-брутфорс"
 
 ## Команды для сборки и тестирования проекта
-* `make config` - Генерация файлов config.json
-* `make generate` - Генерация gRPC API
-* `make build` - Сборка бинарных файлов api и клиента (.bin/)
-* `make migrate` - Запуск миграций goose на локальной БД
 * `make test` - Выполнение unit-тестов
-* `make lint` -  запуск линтеров golangci-lint
+
+* `make run-tests` - запуск docker-compose с тест-контейнерами (up)
+* `make down-tests` - остановка docker-compose с тест-контейнерами (down)
+
 * `make run` - запуск контейнеров (docker-compose up)
 * `make rund`  - запуск контейнеров и отключение от консоли (docker-compose up -d)
 * `make status`  - статус контейнеров (docker-compose ps)
 * `make down` - остановка контейнеров (docker-compose down)
-* `make run-tests` - запуск docker-compose с тест-контейнерами (up)
-* `make down-tests` - остановка docker-compose с тест-контейнерами (down)
+
+* `make config` - Генерация файлов config.json
+* `make generate` - Генерация gRPC API
+* `make build` - Сборка бинарных файлов api и клиента (.bin/)
+* `make migrate` - Запуск миграций goose на локальной БД
+* `make lint` -  запуск линтеров golangci-lint
 
 ## Параметры командной строки клиента mbb-cli:
 Использование:
