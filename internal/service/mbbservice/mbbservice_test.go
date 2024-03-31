@@ -137,29 +137,23 @@ func TestClearBucket(t *testing.T) {
 }
 
 // в пайпе этот тест не работает, заменю интеграционным
-// func TestCheck(t *testing.T) {
-// 	service, ctx := setup()
-// 	ip := model.NewIPAddr("192.168.1.1")
-// 	const login = "test"
+func TestCheck(t *testing.T) {
+	service, ctx := setup()
+	ip := model.NewIPAddr("192.168.1.1")
+	const login = "test"
 
-// 	for i := 0; i < 3; i++ {
-// 		allow, err := service.Check(ctx, *ip, login, strconv.Itoa(i))
-// 		require.NoError(t, err)
-// 		require.True(t, allow)
-// 		time.Sleep(time.Minute / time.Duration(service.svgConfig.MaxPerMinForIP))
-// 	}
-// 	allow, err := service.Check(ctx, *ip, login, "password1")
-// 	require.NoError(t, err)
-// 	require.True(t, allow)
-// 	// false, так как 2 запроса подряд
-// 	allow, err = service.Check(ctx, *ip, login, "password2")
-// 	require.NoError(t, err)
-// 	require.False(t, allow)
-// 	// сразу же очистить
-// 	err = service.ClearBucket(ctx, *ip, login)
-// 	require.NoError(t, err)
-// 	// и теперь запрос пройдёт
-// 	allow, err = service.Check(ctx, *ip, login, "password")
-// 	require.NoError(t, err)
-// 	require.True(t, allow)
-// }
+	allow, err := service.Check(ctx, *ip, login, "password1")
+	require.NoError(t, err)
+	require.True(t, allow)
+	// false, так как 2 запроса подряд по ip и login
+	allow, err = service.Check(ctx, *ip, login, "password2")
+	require.NoError(t, err)
+	require.False(t, allow)
+	// сразу же очистить
+	err = service.ClearBucket(ctx, *ip, login)
+	require.NoError(t, err)
+	// и теперь запрос пройдёт
+	allow, err = service.Check(ctx, *ip, login, "password")
+	require.NoError(t, err)
+	require.True(t, allow)
+}
