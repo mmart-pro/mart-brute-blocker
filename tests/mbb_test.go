@@ -6,7 +6,9 @@ import (
 	"flag"
 	"log"
 	"os"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
@@ -17,9 +19,10 @@ import (
 )
 
 var (
-	client  pb.MBBServiceClient
-	ctx     = context.Background()
-	stepErr error
+	client          pb.MBBServiceClient
+	ctx             = context.Background()
+	stepErr         error
+	lastCheckResult bool
 )
 
 func FeatureContext(s *godog.ScenarioContext) {
@@ -41,6 +44,12 @@ func FeatureContext(s *godog.ScenarioContext) {
 	s.Step(`^я должен получить ответ, что IP-адрес "([^"]*)" находится в Black list$`, iShouldGetResponseThatIPAddressIsInBlackList)
 
 	s.Step(`^я получаю ошибку$`, iGetAnError)
+
+	s.Step(`^у нас есть IP-адрес "([^"]*)", логин "([^"]*)" и пароль "([^"]*)"$`, weHaveIPAddressLoginAndPassword)
+	s.Step(`^я вызываю метод Check с IP-адресом "([^"]*)", логином "([^"]*)" и паролем "([^"]*)"$`, weCallMethodCheckWithIPAddressLoginAndPassword)
+	s.Step(`^метод Check возвращает "([^"]*)"$`, methodCheckReturns)
+
+	s.Step(`^я вызываю метод Check с IP-адресом "([^"]*)", логином "([^"]*)" и паролем "([^"]*)" (\d+) раза за (\d+) секунд$`, weCallMethodCheckMultipleTimes)
 }
 
 func iGetAnError() error {
@@ -156,6 +165,39 @@ func iShouldGetResponseThatIPAddressIsInBlackList(ip string) error {
 		return errors.New("IP address is not in the Black list")
 	}
 
+	return nil
+}
+
+func weHaveIPAddressLoginAndPassword(ip, login, password string) error {
+	return nil
+}
+
+func weCallMethodCheckWithIPAddressLoginAndPassword(ip, login, password string) error {
+	check, err := client.Check(ctx, &pb.CheckRequest{Ip: ip, Login: login, Password: password})
+	if err != nil {
+		return err
+	}
+	lastCheckResult = check.Allow
+	return err
+}
+
+func methodCheckReturns(expected string) error {
+	if strconv.FormatBool(lastCheckResult) != expected {
+		return errors.New("unexpected check result")
+	}
+	return nil
+}
+
+func weCallMethodCheckMultipleTimes(ip, login, password string, times, secs int) error {
+	sleep := time.Duration(secs) * time.Second / time.Duration(times)
+	for i := 0; i < times; i++ {
+		check, err := client.Check(ctx, &pb.CheckRequest{Ip: ip, Login: login, Password: password})
+		if err != nil {
+			return err
+		}
+		lastCheckResult = check.Allow
+		time.Sleep(sleep)
+	}
 	return nil
 }
 
