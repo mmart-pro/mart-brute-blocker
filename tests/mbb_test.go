@@ -187,14 +187,19 @@ func TestMain(_ *testing.M) {
 }
 
 func initializeTestSuite(ctx *godog.TestSuiteContext) {
+	var conn *grpc.ClientConn
+
 	ctx.BeforeSuite(func() {
 		var err error
-		conn, err := grpc.Dial("mbb-api:5000", grpc.WithTransportCredentials(insecure.NewCredentials()))
-		// conn, err := grpc.Dial("localhost:15000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+		conn, err = grpc.Dial("mbb-api:5000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+		// conn, err = grpc.Dial("localhost:15000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			log.Fatalf("couldn't connect: %v", err)
 		}
-		// defer conn.Close()
 		client = pb.NewMBBServiceClient(conn)
+	})
+
+	ctx.AfterSuite(func() {
+		conn.Close()
 	})
 }
