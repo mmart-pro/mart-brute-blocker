@@ -46,10 +46,10 @@ func FeatureContext(s *godog.ScenarioContext) {
 	s.Step(`^я получаю ошибку$`, iGetAnError)
 
 	s.Step(`^у нас есть IP-адрес "([^"]*)", логин "([^"]*)" и пароль "([^"]*)"$`, weHaveIPAddressLoginAndPassword)
-	s.Step(`^я вызываю метод Check с IP-адресом "([^"]*)", логином "([^"]*)" и паролем "([^"]*)"$`, weCallMethodCheckWithIPAddressLoginAndPassword)
+	s.Step(`^я вызываю метод Check с IP-адресом "([^"]*)", логином "([^"]*)" и паролем "([^"]*)"$`, callCheckWithIPAddrLoginAndPassword)
 	s.Step(`^метод Check возвращает "([^"]*)"$`, methodCheckReturns)
 
-	s.Step(`^я вызываю метод Check с IP-адресом "([^"]*)", логином "([^"]*)" и паролем "([^"]*)" (\d+) раза за (\d+) секунд$`, weCallMethodCheckMultipleTimes)
+	s.Step(`^я вызываю метод Check с IP-адресом "([^"]*)", логином "([^"]*)" и паролем "([^"]*)" (\d+) раза за (\d+) секунд$`, weCallMethodCheckMultipleTimes) //nolint:lll
 }
 
 func iGetAnError() error {
@@ -168,11 +168,11 @@ func iShouldGetResponseThatIPAddressIsInBlackList(ip string) error {
 	return nil
 }
 
-func weHaveIPAddressLoginAndPassword(ip, login, password string) error {
+func weHaveIPAddressLoginAndPassword(_, _, _ string) error {
 	return nil
 }
 
-func weCallMethodCheckWithIPAddressLoginAndPassword(ip, login, password string) error {
+func callCheckWithIPAddrLoginAndPassword(ip, login, password string) error {
 	check, err := client.Check(ctx, &pb.CheckRequest{Ip: ip, Login: login, Password: password})
 	if err != nil {
 		return err
